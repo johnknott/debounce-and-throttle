@@ -57,15 +57,15 @@ jobs:
       - name: Run credo
         run: mix credo
 
-       - name: Cache PLT files
-        id: cache-plt
-        uses: actions/cache@v2
-        with:
-          path: |
-            _build
-            priv/plts
-          key: plt-cache-${{ steps.set_vars.outputs.mix_hash }}
-          restore-keys: |
-            plt-cache-
+      #  - name: Cache PLT files
+      #   id: cache-plt
+      #   uses: actions/cache@v2
+      #   with:
+      #     path: |
+      #       _build
+      #       priv/plts
+      #     key: plt-cache-${{ steps.set_vars.outputs.mix_hash }}
+      #     restore-keys: |
+      #       plt-cache-
       - name: Run Dialyzer
         run: mix dialyzer
