@@ -44,10 +44,11 @@ jobs:
         with:
           path: priv/plts
           key: PLT-cache-${{ steps.set_vars.outputs.mix_hash }}
+          restore-keys: PLT-cache-
       - name: Create PLTs
         if: steps.plt-cache.outputs.cache-hit != 'true'
         run: |
           mkdir -p priv/plts
           mix dialyzer --plt
       - name: Run dialyzer
-        run: mix dialyzer --no-check
+        run: mix dialyzer
