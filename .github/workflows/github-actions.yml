@@ -67,5 +67,5 @@ jobs:
       #     key: plt-cache-${{ steps.set_vars.outputs.mix_hash }}
       #     restore-keys: |
       #       plt-cache-
-      - name: Run Dialyzer
-        run: mix dialyzer
+      # - name: Run Dialyzer
+      #   run: mix dialyzer
