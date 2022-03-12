@@ -8,8 +8,6 @@ defmodule DebounceAndThrottle.Server do
   require IEx
   require Logger
 
-  defmodule DebounceResult, do: defstruct([:timer_ref, :scheduled_at, :debounced_count, :extra_data])
-
   # Client
 
   def start_link(state) do
