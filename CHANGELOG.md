@@ -1,5 +1,6 @@
 # Changelog
-I'll try to follow the format of: https://keepachangelog.com/en/1.0.0/
+
+I'll try to follow the format of: [https://keepachangelog.com/en/1.0.0/]
 
 ## Unreleased
 

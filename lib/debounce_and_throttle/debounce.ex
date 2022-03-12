@@ -1,8 +1,8 @@
 require IEx
 
 defmodule DebounceAndThrottle.Debounce do
-  alias DebounceAndThrottle.Debounce
   defstruct([:timer_ref, :scheduled_at, :debounced_count, :extra_data])
+  alias DebounceAndThrottle.Debounce
 
   @moduledoc """
   This module implements the Debounce API.
@@ -14,6 +14,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
+  @spec send(pid() | atom(), term(), String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
   def send(pid, message, key, period) do
     result = GenServer.call(@server, {:send_debounced, {pid, message, key, period}})
     {:ok, result}
@@ -24,6 +25,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
+  @spec call(fun(), String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
   def call(fun, key, period) when is_function(fun) do
     result = GenServer.call(@server, {:call_debounced, {fun, key, period}})
     {:ok, result}
@@ -34,6 +36,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
+  @spec apply(module, fun :: atom(), [any], String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
   def apply(module, fun, args, key, period) do
     result = GenServer.call(@server, {:apply_debounced, {module, fun, args, key, period}})
     {:ok, result}
@@ -42,7 +45,20 @@ defmodule DebounceAndThrottle.Debounce do
   @doc """
   Returns the state - the current list of debounced functions. Useful for debugging.
 
-  Returns `{:ok, [%Debounce{}, ...]}`.
+  Returns something like:
+  %{
+    apply: %{},
+    call: %{
+      "say_hey" => %DebounceAndThrottle.Debounce{
+        debounced_count: 1,
+        extra_data: %{fun: #Function<45.65746770/0 in :erl_eval.expr/5>},
+        scheduled_at: ~U[2022-03-12 22:50:01.190171Z],
+        timer_ref: #Reference<0.418177534.3850108929.259344>
+      }
+    },
+    send: %{}
+  }
   """
-  def state(), do: {:ok, GenServer.call(@server, {:state, :debounced})}
+  @spec state() :: map()
+  def state(), do: GenServer.call(@server, {:state, :debounced})
 end
