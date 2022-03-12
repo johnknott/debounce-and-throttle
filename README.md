@@ -1,10 +1,12 @@
 # DebounceAndThrottle
 
 [![Hex version badge](https://img.shields.io/hexpm/v/debounce_and_throttle.svg)](https://hex.pm/packages/debounce_and_throttle)
-[![License badge](https://img.shields.io/hexpm/l/debounce_and_throttle.svg)](https://github.com/johnknott/debounce_and_throttle/blob/master/LICENSE.md)
+[![License badge](https://img.shields.io/hexpm/l/debounce-and-throttle.svg)](https://github.com/johnknott/debounce-and-throttle/blob/master/LICENSE.md)
 [![Build status badge](https://img.shields.io/circleci/project/github/surgeventures/repo-example-elixir/master.svg)](https://circleci.com/gh/surgeventures/repo-example-elixir/tree/master)
 [![Code coverage badge](https://img.shields.io/codecov/c/github/johnknott/debounce_and_throttle/master.svg)](https://codecov.io/gh/johnknott/debounce_and_throttle/branch/master)
 [![Build Status](https://github.com/johnknott/debounce-and-throttle/workflows/CI/badge.svg)](https://github.com/johnknott/surface/actions?query=workflow%3A%22CI%22)
+[![example workflow](https://github.com/johnknott/debounce-and-throttle/workflows/elixir.yml/badge.svg)]
+
 
 DebounceAndThrottle is a simple library to allow to *debounce* or *throttle* function calls or message sending.
 
