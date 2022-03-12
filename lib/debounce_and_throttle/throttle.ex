@@ -1,8 +1,16 @@
 require IEx
 
 defmodule DebounceAndThrottle.Throttle do
-  defstruct([:status, :throttled_until, :throttled_until_utc, :throttled_count, :extra_data])
   alias DebounceAndThrottle.Throttle
+  defstruct([:status, :throttled_until, :throttled_until_utc, :throttled_count, :extra_data])
+
+  @type t :: %Throttle{
+          status: atom(),
+          throttled_until: integer(),
+          throttled_until_utc: DateTime.t(),
+          throttled_count: non_neg_integer(),
+          extra_data: map()
+        }
 
   @moduledoc """
   This module implements the Throttle API.
@@ -14,7 +22,7 @@ defmodule DebounceAndThrottle.Throttle do
 
   Returns `{:ok, %Throttle{}}`.
   """
-  @spec send(pid() | atom(), term(), String.t(), non_neg_integer()) :: {:ok, %Throttle{}}
+  @spec send(pid() | atom(), term(), String.t(), non_neg_integer()) :: {:ok, Throttle.t()}
   def send(pid, message, key, period) do
     result = GenServer.call(@server, {:send_throttled, {pid, message, key, period}})
     {:ok, result}
@@ -25,7 +33,7 @@ defmodule DebounceAndThrottle.Throttle do
 
   Returns `{:ok, %Throttle{}}`.
   """
-  @spec call(fun(), String.t(), non_neg_integer()) :: {:ok, %Throttle{}}
+  @spec call(fun(), String.t(), non_neg_integer()) :: {:ok, Throttle.t()}
   def call(fun, key, period) do
     result = GenServer.call(@server, {:call_throttled, {fun, key, period}})
     {:ok, result}
@@ -36,7 +44,7 @@ defmodule DebounceAndThrottle.Throttle do
 
   Returns `{:ok, %Throttle{}}`.
   """
-  @spec apply(module, fun :: atom(), [any], String.t(), non_neg_integer()) :: {:ok, %Throttle{}}
+  @spec apply(module, fun :: atom(), [any], String.t(), non_neg_integer()) :: {:ok, Throttle.t()}
   def apply(module, fun, args, key, period) do
     result = GenServer.call(@server, {:apply_throttled, {module, fun, args, key, period}})
     {:ok, result}

@@ -169,22 +169,20 @@ defmodule DebounceAndThrottle.Server do
   defp throttled_key_state(old_key_state, period, extra_data) do
     now = System.monotonic_time(:millisecond)
 
-    cond do
-      old_key_state == nil or now > old_key_state.throttled_until ->
-        # Not throttled, or was throttled but now expired
-        %Throttle{
-          status: :executed,
-          throttled_until: now + period,
-          throttled_until_utc: DateTime.add(DateTime.utc_now(), period, :millisecond),
-          throttled_count: 0,
-          extra_data: extra_data
-        }
-
-      true ->
-        # Throttled
-        Map.update(%{old_key_state | status: :throttled}, :throttled_count, 0, fn old_count ->
-          old_count + 1
-        end)
+    if old_key_state == nil or now > old_key_state.throttled_until do
+      # Not throttled, or was throttled but now expired
+      %Throttle{
+        status: :executed,
+        throttled_until: now + period,
+        throttled_until_utc: DateTime.add(DateTime.utc_now(), period, :millisecond),
+        throttled_count: 0,
+        extra_data: extra_data
+      }
+    else
+      # Throttled
+      Map.update(%{old_key_state | status: :throttled}, :throttled_count, 0, fn old_count ->
+        old_count + 1
+      end)
     end
   end
 end

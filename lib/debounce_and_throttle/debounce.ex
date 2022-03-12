@@ -4,6 +4,13 @@ defmodule DebounceAndThrottle.Debounce do
   defstruct([:timer_ref, :scheduled_at, :debounced_count, :extra_data])
   alias DebounceAndThrottle.Debounce
 
+  @type t :: %Debounce{
+          timer_ref: reference(),
+          scheduled_at: DateTime.t(),
+          debounced_count: non_neg_integer(),
+          extra_data: map()
+        }
+
   @moduledoc """
   This module implements the Debounce API.
   """
@@ -14,7 +21,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
-  @spec send(pid() | atom(), term(), String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
+  @spec send(pid() | atom(), term(), String.t(), non_neg_integer()) :: {:ok, Debounce.t()}
   def send(pid, message, key, period) do
     result = GenServer.call(@server, {:send_debounced, {pid, message, key, period}})
     {:ok, result}
@@ -25,7 +32,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
-  @spec call(fun(), String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
+  @spec call(fun(), String.t(), non_neg_integer()) :: {:ok, Debounce.t()}
   def call(fun, key, period) when is_function(fun) do
     result = GenServer.call(@server, {:call_debounced, {fun, key, period}})
     {:ok, result}
@@ -36,7 +43,7 @@ defmodule DebounceAndThrottle.Debounce do
 
   Returns `{:ok, %Debounce{}}`.
   """
-  @spec apply(module, fun :: atom(), [any], String.t(), non_neg_integer()) :: {:ok, %Debounce{}}
+  @spec apply(module, fun :: atom(), [any], String.t(), non_neg_integer()) :: {:ok, Debounce.t()}
   def apply(module, fun, args, key, period) do
     result = GenServer.call(@server, {:apply_debounced, {module, fun, args, key, period}})
     {:ok, result}
