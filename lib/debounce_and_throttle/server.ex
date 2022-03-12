@@ -23,7 +23,7 @@ defmodule DebounceAndThrottle.Server do
 
   @impl true
   def init(_state) do
-    :timer.send_interval(1000, :cleanup)
+    :timer.send_interval(1_000, :cleanup)
     {:ok, initial_state()}
   end
 
