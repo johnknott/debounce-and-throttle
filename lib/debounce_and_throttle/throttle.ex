@@ -1,6 +1,9 @@
 require IEx
 
 defmodule DebounceAndThrottle.Throttle do
+  @moduledoc """
+  This module implements the Throttle API.
+  """
   @server DebounceAndThrottle.Server
 
   def send(pid, message, key, delay) do

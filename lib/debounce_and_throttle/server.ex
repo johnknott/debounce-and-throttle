@@ -1,9 +1,14 @@
 defmodule DebounceAndThrottle.Server do
+  @moduledoc """
+  The Genserver that implements the Debounce and Throttle functionality.
+  End users will not use this, instead using the API in debounce.ex and throttle.ex
+  """
+
   use GenServer
   require IEx
   require Logger
 
-  # Client (API is in debounce.ex and throttle.ex)
+  # Client
 
   @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(state) do
