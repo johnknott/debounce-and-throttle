@@ -26,12 +26,18 @@ jobs:
           elixir-version: ${{ matrix.elixir }}
           otp-version: ${{ matrix.otp }}
 
+      - name: Set mix file hash
+        id: set_vars
+        run: /
+          mix_hash="${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}"
+          echo "::set-output name=mix_hash::$mix_hash"
+
       - name: Retrieve Mix Dependencies Cache
         uses: actions/cache@v1
         id: mix-cache
         with:
           path: deps
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-mix-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          key: ${{ steps.set_vars.outputs.mix_hash }}
 
       - name: Install Mix Dependencies
         if: steps.mix-cache.outputs.cache-hit != 'true'
@@ -51,17 +57,19 @@ jobs:
       - name: Run credo
         run: mix credo
 
-      - name: Retrieve PLT Cache
-        uses: actions/cache@v1
-        id: plt-cache
+       - name: Cache PLT files
+        id: cache-plt
+        uses: actions/cache@v2
         with:
-          path: priv/plts
-          key: ${{ runner.os }}-${{ matrix.otp }}-${{ matrix.elixir }}-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
-
-      - name: Create PLTs
-        if: steps.plt-cache.outputs.cache-hit != 'true'
-        run: |
-          mkdir -p priv/plts
-          mix dialyzer --plt
-      - name: Run dialyzer
-        run: mix dialyzer --no-check
+          path: |
+            _build/dev/*.plt
+            _build/dev/*.plt.hash
+          key: plt-cache-${{ steps.set_vars.outputs.mix_hash }}
+          restore-keys: |
+            plt-cache-
+      - name: Run Dialyzer
+        uses: erlef/setup-elixir@v1
+        with:
+          otp-version: %{{ matrix.otp }}
+          elixir-version: %{{ matrix.elixir }}
+      - run: mix dialyzer
