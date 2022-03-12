@@ -68,8 +68,4 @@ jobs:
           restore-keys: |
             plt-cache-
       - name: Run Dialyzer
-        uses: erlef/setup-elixir@v1
-        with:
-          otp-version: %{{ matrix.otp }}
-          elixir-version: %{{ matrix.elixir }}
-      - run: mix dialyzer
+        run: mix dialyzer
