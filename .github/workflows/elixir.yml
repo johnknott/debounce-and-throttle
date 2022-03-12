@@ -49,6 +49,6 @@ jobs:
       - name: Run dialyzer
         run: mix dialyzer
       - name: Run coveralls
-        run: MIX_ENV=test mix coveralls
+        run: MIX_ENV=test mix coveralls.xml
       - name: Upload to Codecov
         run: bash <(curl -s https://codecov.io/bash)
