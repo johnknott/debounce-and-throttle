@@ -5,6 +5,7 @@ defmodule DebounceAndThrottle.Server do
   """
 
   use GenServer
+  alias DebounceAndThrottle.{Throttle, Debounce}
   require IEx
   require Logger
 
@@ -30,6 +31,11 @@ defmodule DebounceAndThrottle.Server do
   def handle_call(:reset, _, state) do
     cancel_timers(state)
     {:reply, :ok, initial_state()}
+  end
+
+  @impl true
+  def handle_call({:state, type}, _, state) do
+    {:reply, state[type], state}
   end
 
   @impl true
@@ -60,7 +66,7 @@ defmodule DebounceAndThrottle.Server do
   def handle_call({:send_throttled, {pid, message, key, period}}, _, state) do
     old_key_state = state[:throttled][:send][key]
     key_state = throttled_key_state(old_key_state, period, %{pid: pid, message: message})
-    if key_state[:status] == :executed, do: send(pid, message)
+    if key_state.status == :executed, do: send(pid, message)
     {:reply, key_state, add_fun_state(state, :throttled, :send, key, key_state)}
   end
 
@@ -68,7 +74,7 @@ defmodule DebounceAndThrottle.Server do
   def handle_call({:call_throttled, {fun, key, period}}, _, state) do
     old_key_state = state[:throttled][:call][key]
     key_state = throttled_key_state(old_key_state, period, %{fun: fun})
-    if key_state[:status] == :executed, do: spawn(fun)
+    if key_state.status == :executed, do: spawn(fun)
     {:reply, key_state, add_fun_state(state, :throttled, :call, key, key_state)}
   end
 
@@ -76,7 +82,7 @@ defmodule DebounceAndThrottle.Server do
   def handle_call({:apply_throttled, {module, fun, args, key, period}}, _, state) do
     old_key_state = state[:throttled][:apply][key]
     key_state = throttled_key_state(old_key_state, period, %{module: module, fun: fun, args: args})
-    if key_state[:status] == :executed, do: spawn(fn -> apply(module, fun, args) end)
+    if key_state.status == :executed, do: spawn(fn -> apply(module, fun, args) end)
     {:reply, key_state, add_fun_state(state, :throttled, :apply, key, key_state)}
   end
 
@@ -120,7 +126,7 @@ defmodule DebounceAndThrottle.Server do
     Enum.reduce(types, state, fn type, new_state ->
       filtered =
         :maps.filter(
-          fn _, v -> v[:throttled_until] > System.monotonic_time(:millisecond) end,
+          fn _, v -> v.throttled_until > System.monotonic_time(:millisecond) end,
           state[:throttled][type]
         )
 
@@ -143,12 +149,16 @@ defmodule DebounceAndThrottle.Server do
 
   defp set_timer(nil, message, period), do: {Process.send_after(self(), message, period), run_at(period), 1}
 
-  defp add_fun_state(state, ns, type, key, key_state), do: put_in(state, [ns, type, key], key_state)
+  defp add_fun_state(state, ns = :debounced, type, key, key_state),
+    do: put_in(state, [ns, type, key], key_state)
+
+  defp add_fun_state(state, ns = :throttled, type, key, key_state),
+    do: put_in(state, [ns, type, key], key_state)
 
   defp remove_fun_state(state, type, key), do: pop_in(state, [:debounced, type, key]) |> elem(1)
 
   defp debounced_key_state(timer_ref, scheduled_at, debounced_count, extra_data) do
-    %{
+    %Debounce{
       timer_ref: timer_ref,
       scheduled_at: scheduled_at,
       debounced_count: debounced_count,
@@ -159,10 +169,10 @@ defmodule DebounceAndThrottle.Server do
   defp throttled_key_state(old_key_state, period, extra_data) do
     now = System.monotonic_time(:millisecond)
 
-    case old_key_state[:throttled_until] do
-      throttled_until when throttled_until == nil or now > throttled_until ->
+    cond do
+      old_key_state == nil or now > old_key_state.throttled_until ->
         # Not throttled, or was throttled but now expired
-        %{
+        %Throttle{
           status: :executed,
           throttled_until: now + period,
           throttled_until_utc: DateTime.add(DateTime.utc_now(), period, :millisecond),
@@ -170,7 +180,7 @@ defmodule DebounceAndThrottle.Server do
           extra_data: extra_data
         }
 
-      _ ->
+      true ->
         # Throttled
         Map.update(%{old_key_state | status: :throttled}, :throttled_count, 0, fn old_count ->
           old_count + 1

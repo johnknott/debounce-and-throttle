@@ -2,7 +2,7 @@
 
 [![Hex version badge](https://img.shields.io/hexpm/v/debounce_and_throttle.svg)](https://hex.pm/packages/debounce_and_throttle)
 [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/johnknott/debounce-and-throttle/blob/master/LICENSE.md)
-[![Code coverage badge](https://img.shields.io/codecov/c/github/johnknott/debounce-and-throttle/badge.svg)](https://codecov.io/gh/johnknott/debounce-and-throttle/branch/master)
+[![Code coverage badge](https://img.shields.io/codecov/c/github/johnknott/debounce-and-throttle/badge.svg)](https://app.codecov.io/gh/johnknott/debounce-and-throttle)
 [![Github Workflow](https://img.shields.io/github/workflow/status/johnknott/debounce-and-throttle/Elixir%20CI?logo=GitHub)](https://github.com/johnknott/debounce-and-throttle/actions/workflows/elixir.yml)
 
 DebounceAndThrottle is a simple library to allow to *debounce* or *throttle* function calls or message sending.
@@ -68,6 +68,10 @@ This message will be sent after 5 seconds, but only if this method wasnt called 
 Debounce.send(fn -> IO.puts("Hey there!") end, "some-key", 5_000)
 ```
 
+```elixir
+Debounce.state
+```
+
 ### Throttle
 
 This anonymous function will be called straight away, but only if this method wasnt called in the last 5 seconds with the same `key`
@@ -86,6 +90,10 @@ This message will be sent straight away, but only if this method wasnt called in
 
 ```elixir
 Throttle.send(fn -> IO.puts("Hey there!") end, "some-key", 5_000)
+```
+
+```elixir
+Throttle.state
 ```
 
 ## Notes

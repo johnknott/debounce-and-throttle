@@ -16,7 +16,7 @@ defmodule DebounceAndThrottle.Throttle do
   """
   def send(pid, message, key, period) do
     result = GenServer.call(@server, {:send_throttled, {pid, message, key, period}})
-    {:ok, struct(Throttle, result)}
+    {:ok, result}
   end
 
   @doc """
@@ -26,7 +26,7 @@ defmodule DebounceAndThrottle.Throttle do
   """
   def call(fun, key, period) do
     result = GenServer.call(@server, {:call_throttled, {fun, key, period}})
-    {:ok, struct(Throttle, result)}
+    {:ok, result}
   end
 
   @doc """
@@ -36,6 +36,13 @@ defmodule DebounceAndThrottle.Throttle do
   """
   def apply(module, fun, args, key, period) do
     result = GenServer.call(@server, {:apply_throttled, {module, fun, args, key, period}})
-    {:ok, struct(Throttle, result)}
+    {:ok, result}
   end
+
+  @doc """
+  Returns the state - the current list of throttled functions. Useful for debugging.
+
+  Returns `{:ok, [%Debounce{}, ...]}`.
+  """
+  def state(), do: {:ok, GenServer.call(@server, {:state, :throttled})}
 end
