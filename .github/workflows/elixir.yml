@@ -13,16 +13,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+      - name: Set variables
+        id: set_vars
+        run: /
+          mix_hash="${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}"
+          elixir="1.13.3"
+          otp="24.3"
+          echo "::set-output name=mix_hash::$mix_hash"
       - name: Set up Elixir
         uses: erlef/setup-beam@988e02bfe678367a02564f65ca2e37726dc0268f
         with:
-          elixir-version: "1.13.3" # Define the elixir version [required]
-          otp-version: "24.3" # Define the OTP version [required]
+          elixir-version: ${{ steps.set_vars.outputs.elixir }}
+          otp-version: ${{ steps.set_vars.outputs.otp }}
       - name: Restore dependencies cache
         uses: actions/cache@v2
         with:
           path: deps
-          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          key: mix-cache-${{ steps.set_vars.outputs.mix_hash }}
           restore-keys: ${{ runner.os }}-mix-
       - name: Install dependencies
         run: mix deps.get
@@ -36,7 +43,7 @@ jobs:
         id: plt-cache
         with:
           path: priv/plts
-          key: ${{ runner.os }}-1.13.3-24.3-plts-${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}
+          key: PLT-cache-${{ steps.set_vars.outputs.mix_hash }}
 
       - name: Create PLTs
         if: steps.plt-cache.outputs.cache-hit != 'true'
