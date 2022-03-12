@@ -8,9 +8,10 @@ defmodule DebounceAndThrottle.Server do
   require IEx
   require Logger
 
+  defmodule DebounceResult, do: defstruct([:timer_ref, :scheduled_at, :debounced_count, :extra_data])
+
   # Client
 
-  @spec start_link(any) :: :ignore | {:error, any} | {:ok, pid}
   def start_link(state) do
     GenServer.start_link(__MODULE__, state, name: __MODULE__)
   end
@@ -34,49 +35,49 @@ defmodule DebounceAndThrottle.Server do
   end
 
   @impl true
-  def handle_call({:send_debounced, {pid, message, key, delay}}, _, state) do
+  def handle_call({:send_debounced, {pid, message, key, period}}, _, state) do
     old_key_state = state[:debounced][:send][key]
-    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:send_fun, pid, message, key}, delay)
+    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:send_fun, pid, message, key}, period)
     key_state = debounced_key_state(timer_ref, scheduled_at, count, %{pid: pid, message: message})
     {:reply, key_state, add_fun_state(state, :debounced, :send, key, key_state)}
   end
 
   @impl true
-  def handle_call({:call_debounced, {fun, key, delay}}, _, state) do
+  def handle_call({:call_debounced, {fun, key, period}}, _, state) do
     old_key_state = state[:debounced][:call][key]
-    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:call_fun, fun, key}, delay)
+    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:call_fun, fun, key}, period)
     key_state = debounced_key_state(timer_ref, scheduled_at, count, %{fun: fun})
     {:reply, key_state, add_fun_state(state, :debounced, :call, key, key_state)}
   end
 
   @impl true
-  def handle_call({:apply_debounced, {module, fun, args, key, delay}}, _, state) do
+  def handle_call({:apply_debounced, {module, fun, args, key, period}}, _, state) do
     old_key_state = state[:debounced][:apply][key]
-    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:apply_fun, module, fun, args, key}, delay)
+    {timer_ref, scheduled_at, count} = set_timer(old_key_state, {:apply_fun, module, fun, args, key}, period)
     key_state = debounced_key_state(timer_ref, scheduled_at, count, %{module: module, fun: fun, args: args})
     {:reply, key_state, add_fun_state(state, :debounced, :apply, key, key_state)}
   end
 
   @impl true
-  def handle_call({:send_throttled, {pid, message, key, delay}}, _, state) do
+  def handle_call({:send_throttled, {pid, message, key, period}}, _, state) do
     old_key_state = state[:throttled][:send][key]
-    key_state = throttled_key_state(old_key_state, delay, %{pid: pid, message: message})
+    key_state = throttled_key_state(old_key_state, period, %{pid: pid, message: message})
     if key_state[:status] == :executed, do: send(pid, message)
     {:reply, key_state, add_fun_state(state, :throttled, :send, key, key_state)}
   end
 
   @impl true
-  def handle_call({:call_throttled, {fun, key, delay}}, _, state) do
+  def handle_call({:call_throttled, {fun, key, period}}, _, state) do
     old_key_state = state[:throttled][:call][key]
-    key_state = throttled_key_state(old_key_state, delay, %{fun: fun})
+    key_state = throttled_key_state(old_key_state, period, %{fun: fun})
     if key_state[:status] == :executed, do: spawn(fun)
     {:reply, key_state, add_fun_state(state, :throttled, :call, key, key_state)}
   end
 
   @impl true
-  def handle_call({:apply_throttled, {module, fun, args, key, delay}}, _, state) do
+  def handle_call({:apply_throttled, {module, fun, args, key, period}}, _, state) do
     old_key_state = state[:throttled][:apply][key]
-    key_state = throttled_key_state(old_key_state, delay, %{module: module, fun: fun, args: args})
+    key_state = throttled_key_state(old_key_state, period, %{module: module, fun: fun, args: args})
     if key_state[:status] == :executed, do: spawn(fn -> apply(module, fun, args) end)
     {:reply, key_state, add_fun_state(state, :throttled, :apply, key, key_state)}
   end
@@ -135,14 +136,14 @@ defmodule DebounceAndThrottle.Server do
     end
   end
 
-  defp run_at(delay), do: DateTime.add(DateTime.utc_now(), delay, :millisecond)
+  defp run_at(period), do: DateTime.add(DateTime.utc_now(), period, :millisecond)
 
-  defp set_timer(%{timer_ref: timer_ref, debounced_count: debounced_count}, message, delay) do
+  defp set_timer(%{timer_ref: timer_ref, debounced_count: debounced_count}, message, period) do
     Process.cancel_timer(timer_ref)
-    {Process.send_after(self(), message, delay), run_at(delay), debounced_count + 1}
+    {Process.send_after(self(), message, period), run_at(period), debounced_count + 1}
   end
 
-  defp set_timer(nil, message, delay), do: {Process.send_after(self(), message, delay), run_at(delay), 1}
+  defp set_timer(nil, message, period), do: {Process.send_after(self(), message, period), run_at(period), 1}
 
   defp add_fun_state(state, ns, type, key, key_state), do: put_in(state, [ns, type, key], key_state)
 
@@ -157,7 +158,7 @@ defmodule DebounceAndThrottle.Server do
     }
   end
 
-  defp throttled_key_state(old_key_state, delay, extra_data) do
+  defp throttled_key_state(old_key_state, period, extra_data) do
     now = System.monotonic_time(:millisecond)
 
     case old_key_state[:throttled_until] do
@@ -165,8 +166,8 @@ defmodule DebounceAndThrottle.Server do
         # Not throttled, or was throttled but now expired
         %{
           status: :executed,
-          throttled_until: now + delay,
-          throttled_until_utc: DateTime.add(DateTime.utc_now(), delay, :millisecond),
+          throttled_until: now + period,
+          throttled_until_utc: DateTime.add(DateTime.utc_now(), period, :millisecond),
           throttled_count: 0,
           extra_data: extra_data
         }

@@ -3,7 +3,7 @@ I'll try to follow the format of: https://keepachangelog.com/en/1.0.0/
 
 ## Unreleased
 
-## [0.0.1] - 2022-04-12
+## [0.9.0] - 2022-04-12
 
 ### Added
 
