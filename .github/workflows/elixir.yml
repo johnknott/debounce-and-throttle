@@ -15,10 +15,11 @@ jobs:
       - uses: actions/checkout@v2
       - name: Set variables
         id: set_vars
-        run: /
+        run:
           mix_hash="${{ hashFiles(format('{0}{1}', github.workspace, '/mix.lock')) }}"
           elixir="1.13.3"
           otp="24.3"
+          echo "::set-output name=mix_hash::$mix_hash"
       - name: Set up Elixir
         uses: erlef/setup-beam@988e02bfe678367a02564f65ca2e37726dc0268f
         with:
