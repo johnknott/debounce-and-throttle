@@ -62,8 +62,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            _build/dev/*.plt
-            _build/dev/*.plt.hash
+            _build
+            priv/plts
           key: plt-cache-${{ steps.set_vars.outputs.mix_hash }}
           restore-keys: |
             plt-cache-
