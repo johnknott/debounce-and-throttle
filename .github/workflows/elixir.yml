@@ -29,7 +29,10 @@ jobs:
       - name: Restore dependencies cache
         uses: actions/cache@v2
         with:
-          path: deps
+          path: |
+            deps
+            _build
+            priv/plts
           key: mix-cache-${{ steps.set_vars.outputs.mix_hash }}
           restore-keys: mix-cache-
       - name: Install dependencies
@@ -38,13 +41,6 @@ jobs:
         run: mix test
       - name: Run credo
         run: mix credo
-      - name: Retrieve PLT Cache
-        uses: actions/cache@v1
-        id: plt-cache
-        with:
-          path: priv/plts
-          key: PLT-cache-${{ steps.set_vars.outputs.mix_hash }}
-          restore-keys: PLT-cache-
       - name: Create PLTs
         if: steps.plt-cache.outputs.cache-hit != 'true'
         run: |
