@@ -131,8 +131,8 @@ defmodule DebounceTest do
     Debounce.apply(Process, :send, [self(), :some_message, []], "Debounce.apply.1", 100)
     state = Debounce.state()
     assert(length(Map.keys(state[:apply])) == 1)
-    assert(length(Map.keys(state[:send])) == 0)
-    assert(length(Map.keys(state[:call])) == 0)
+    assert(Map.keys(state[:send]) == [])
+    assert(Map.keys(state[:call]) == [])
     key_state = get_in(state, [:apply, "Debounce.apply.1"])
     assert(%Debounce{} = key_state)
   end
