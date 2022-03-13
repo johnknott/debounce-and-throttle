@@ -78,9 +78,9 @@ iex> Debounce.state
   call: %{
     "say_hey" => %DebounceAndThrottle.Debounce{
       debounced_count: 1,
-      extra_data: %{fun: Function<45.65746770/0 in :erl_eval.expr/5>},
+      extra_data: %{fun: 'Function<45.65746770/0 in :erl_eval.expr/5>'},
       scheduled_at: ~U[2022-03-12 22:50:01.190171Z],
-      timer_ref: Reference<0.418177534.3850108929.259344>
+      timer_ref: 'Reference<0.418177534.3850108929.259344>'
     }
   },
   send: %{}
@@ -115,7 +115,7 @@ iex> Throttle.state
   apply: %{},
   call: %{
     "say_hey" => %DebounceAndThrottle.Throttle{
-      extra_data: %{fun: Function<45.65746770/0 in :erl_eval.expr/5>},
+      extra_data: %{fun: 'Function<45.65746770/0 in :erl_eval.expr/5>'},
       status: :executed,
       throttled_count: 0,
       throttled_until: -576460730743,
