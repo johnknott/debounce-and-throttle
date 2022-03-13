@@ -1,9 +1,9 @@
 # DebounceAndThrottle
 
-[![Hex version badge](https://img.shields.io/hexpm/v/debounce_and_throttle.svg)](https://hex.pm/packages/debounce_and_throttle)
-[![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/johnknott/debounce-and-throttle/blob/master/LICENSE.md)
-[![Code coverage badge](https://img.shields.io/codecov/c/github/johnknott/debounce-and-throttle/badge.svg)](https://app.codecov.io/gh/johnknott/debounce-and-throttle)
-[![Github Workflow](https://img.shields.io/github/workflow/status/johnknott/debounce-and-throttle/Elixir%20CI?logo=GitHub)](https://github.com/johnknott/debounce-and-throttle/actions/workflows/elixir.yml)
+[![Hex version badge](https://img.shields.io/hexpm/v/debounce_and_throttle.svg?color=3b4)](https://hex.pm/packages/debounce_and_throttle)
+[![License](https://img.shields.io/badge/license-MIT-green?color=3b4)](https://github.com/johnknott/debounce-and-throttle/blob/master/LICENSE.md)
+[![Code coverage badge](https://img.shields.io/codecov/c/github/johnknott/debounce-and-throttle/badge.svg?color=3b4)](https://app.codecov.io/gh/johnknott/debounce-and-throttle)
+[![Github Workflow](https://img.shields.io/github/workflow/status/johnknott/debounce-and-throttle/Elixir%20CI?logo=github&color=3b4)](https://github.com/johnknott/debounce-and-throttle/actions/workflows/elixir.yml)
 
 DebounceAndThrottle is a simple library to allow to *debounce* or *throttle* function calls or message sending.
 
