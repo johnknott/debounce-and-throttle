@@ -22,4 +22,10 @@ defmodule ServerTest do
     new_state = Server.cleanup(:sys.get_state(Server), [:call, :apply, :send])
     assert(new_state == Server.initial_state())
   end
+
+  test "Test unknown message doesnt crash Genserver" do
+    send(Server, :unknown_message)
+    :timer.sleep(100)
+    assert(is_map(DebounceAndThrottle.Debounce.state()))
+  end
 end

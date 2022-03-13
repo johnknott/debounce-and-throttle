@@ -1,5 +1,3 @@
-require IEx
-
 defmodule DebounceAndThrottle.Debounce do
   defstruct([:timer_ref, :scheduled_at, :debounced_count, :extra_data])
   alias DebounceAndThrottle.Debounce

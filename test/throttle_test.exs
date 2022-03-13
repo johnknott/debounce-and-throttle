@@ -133,4 +133,16 @@ defmodule ThrottleTest do
     Throttle.apply(Process, :send, [self(), :some_message, []], "Debounce.apply.1", delay)
     assert_receive :some_message, 1_000
   end
+
+  test "Throttle.state returns correct state" do
+    state = Throttle.state()
+    assert(state == Server.initial_state()[:throttled])
+    Throttle.apply(Process, :send, [self(), :some_message, []], "Throttle.apply.1", 100)
+    state = Throttle.state()
+    assert(length(Map.keys(state[:apply])) == 1)
+    assert(length(Map.keys(state[:send])) == 0)
+    assert(length(Map.keys(state[:call])) == 0)
+    key_state = get_in(state, [:apply, "Throttle.apply.1"])
+    assert(%Throttle{} = key_state)
+  end
 end

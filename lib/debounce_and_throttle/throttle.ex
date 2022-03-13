@@ -1,5 +1,3 @@
-require IEx
-
 defmodule DebounceAndThrottle.Throttle do
   alias DebounceAndThrottle.Throttle
   defstruct([:status, :throttled_until, :throttled_until_utc, :throttled_count, :extra_data])

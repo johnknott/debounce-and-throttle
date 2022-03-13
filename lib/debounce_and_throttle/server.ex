@@ -6,7 +6,6 @@ defmodule DebounceAndThrottle.Server do
 
   use GenServer
   alias DebounceAndThrottle.{Throttle, Debounce}
-  require IEx
   require Logger
 
   # Client

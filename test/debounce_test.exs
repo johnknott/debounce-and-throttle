@@ -124,4 +124,16 @@ defmodule DebounceTest do
     Debounce.apply(Process, :send, [self(), :some_message, []], "Debounce.apply.1", delay)
     assert_receive :some_message, 1_000
   end
+
+  test "Debounce.state returns correct state" do
+    state = Debounce.state()
+    assert(state == Server.initial_state()[:debounced])
+    Debounce.apply(Process, :send, [self(), :some_message, []], "Debounce.apply.1", 100)
+    state = Debounce.state()
+    assert(length(Map.keys(state[:apply])) == 1)
+    assert(length(Map.keys(state[:send])) == 0)
+    assert(length(Map.keys(state[:call])) == 0)
+    key_state = get_in(state, [:apply, "Debounce.apply.1"])
+    assert(%Debounce{} = key_state)
+  end
 end
