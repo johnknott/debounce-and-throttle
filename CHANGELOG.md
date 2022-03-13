@@ -13,3 +13,4 @@ I'll try to follow the format of: [https://keepachangelog.com/en/1.0.0/]
 - Added full test coverage.
 - Added credo.
 - Added coveralls.
+- Added Github actions and shields.io badges.
