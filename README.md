@@ -66,7 +66,7 @@ Debounce.apply(IO, :puts, ["Hey there!"], "some-key", 5_000)
 This message will be sent after 5 seconds, but only if this method wasnt called in the interim with the same `key`
 
 ```elixir
-Debounce.send(fn -> IO.puts("Hey there!") end, "some-key", 5_000)
+Debounce.send(self(), :some_message, "some-key", 5_000)
 ```
 
 Returns the state - the current list of debounced functions. Useful for debugging.
@@ -104,7 +104,7 @@ Throttle.apply(IO, :puts, ["Hey there!"], "some-key", 5_000)
 This message will be sent straight away, but only if this method wasnt called in the last 5 seconds with the same `key`
 
 ```elixir
-Throttle.send(fn -> IO.puts("Hey there!") end, "some-key", 5_000)
+Throttle.send(self(), :some_message, "some-key", 5_000)
 ```
 
 Returns the state - the current list of throttled functions. Useful for debugging.
